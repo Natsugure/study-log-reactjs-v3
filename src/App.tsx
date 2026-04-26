@@ -1,25 +1,38 @@
-import { Box, Flex, Heading, IconButton, Input, NumberInput, NumberInputField, Spinner, Text } from '@chakra-ui/react'
-import { Trash2 } from "lucide-react"
-import { useState } from 'react'
-import { useStudyRecords } from './hooks/useStudyRecords'
-import { PrimaryButton } from './components/atoms/PrimaryButton';
+import {
+  Box,
+  Flex,
+  Heading,
+  IconButton,
+  Spinner,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+} from "@chakra-ui/react";
+import { Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { useStudyRecords } from "./hooks/useStudyRecords";
+import { PrimaryButton } from "./components/atoms/PrimaryButton";
+import { SubmitFormModal } from "./components/organisms/SubmitFormModal";
 
 export function App() {
-  const { records, isLoading, error, addRecord, deleteRecord } = useStudyRecords()
+  const { records, isLoading, addRecord, deleteRecord } = useStudyRecords();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [newStudyDetail, setNewStudyDetail] = useState('');
-  const [newStudyHour, setNewStudyHour] = useState('0');
+  const totalTime = records.reduce(
+    (accumulator, currentValue) => accumulator + currentValue.time,
+    0,
+  );
 
-  const onClickAdd = () => {
-    const intHour = parseInt(newStudyHour);
-    addRecord(newStudyDetail, intHour)
-    setNewStudyDetail('')
-    setNewStudyHour('0')
-  }
+  const onClickAdd = () => setIsModalOpen(true);
 
   const onClickDelete = (id: string) => {
-    deleteRecord(id)
-  }
+    deleteRecord(id);
+  };
 
   return (
     <>
@@ -36,74 +49,60 @@ export function App() {
           gap={3}
         >
           <Spinner size="xl" color="white" />
-          <Text data-testid="loading-text" color="white">読み込み中…</Text>
+          <Text data-testid="loading-text" color="white">
+            読み込み中…
+          </Text>
         </Box>
       )}
-      <Heading as="h1" data-testid="title">学習記録アプリ</Heading>
+      <SubmitFormModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        addRecord={addRecord}
+      />
+      <Heading as="h1" data-testid="title" mt="4" ml="4">
+        学習記録アプリ
+      </Heading>
+      <Flex justifyContent="right" margin="4">
+        <PrimaryButton label="追加" onClick={onClickAdd} leftIcon={<Plus />} />
+      </Flex>
       <div>
-        <Flex>
-          <Box p='2'>
-            <Text>学習内容</Text>
-          </Box>
-          <Box p='2'>
-            <Input
-              data-testid="study-detail-input"
-              value={newStudyDetail}
-              onChange={(e) => setNewStudyDetail(e.target.value)}
-              height="28px"
-            ></Input>
-          </Box>
-        </Flex>
-        <Flex>
-          <Box p='2'>
-            <Text>学習時間</Text>
-          </Box>
-          <Box p='2'>
-            <NumberInput
-              data-testid="study-hour-input"
-              value={newStudyHour}
-              onChange={(valueAsString) => setNewStudyHour(valueAsString)}
-              min={0}
-              max={24}
-            >
-              <NumberInputField height="28px" width="100px"/>
-            </NumberInput>
-          </Box>
-          <Box p='2'>
-            <Text>時間(h)</Text>
-          </Box>
-        </Flex>
-      </div>
-      <div>
-        <ul>
-          {records.map((item, id) => {
-            return (
-              <li key={id}>
-                <div>
-                  {item.title} {item.time}時間
-                  <IconButton
-                    data-testid="delete-button"
-                    aria-label="削除"
-                    icon={<Trash2 />}
-                    colorScheme="red"
-                    size="xs"
-                    onClick={() => {onClickDelete(item.id)}} 
-                  />
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+        <TableContainer data-testid="table-container" margin="4">
+          <Table variant="simple">
+            <Thead>
+              <Tr>
+                <Th>学習内容</Th>
+                <Th>時間</Th>
+                <Th></Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {records.map((item, id) => (
+                <Tr key={id}>
+                  <Td>{item.title}</Td>
+                  <Td>{item.time}時間</Td>
+                  <Td>
+                    <IconButton
+                      data-testid="delete-button"
+                      aria-label="削除"
+                      icon={<Trash2 size={16}/>}
+                      colorScheme="red"
+                      size="xs"
+                      onClick={() => onClickDelete(item.id)}
+                    />
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </TableContainer>
         <div>
-          <PrimaryButton label="登録" onClick={onClickAdd} />
-          {error && <span data-testid="error-message">'入力されていない項目があります'</span>}
-        </div>
-        <div>
-          <p>合計時間 0 / 1000 (h)</p>
+          <Text align="right" p="4">
+            合計: {totalTime} / 1000 時間
+          </Text>
         </div>
       </div>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

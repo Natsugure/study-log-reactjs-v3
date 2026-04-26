@@ -2,22 +2,21 @@ import { Button } from "@chakra-ui/react";
 
 type Props = {
   label: string;
-  onClick?: () => void;
+  onClick: () => void;
   leftIcon?: React.ReactElement;
   rightIcon?: React.ReactElement;
-  type?: "button" | "submit" | "reset";
 };
 
-export function PrimaryButton(props: Props) {
-  const { label, onClick, leftIcon, rightIcon, type } = props;
+export function SecondaryButton(props: Props) {
+  const { label, onClick, leftIcon, rightIcon } = props;
 
   return (
     <Button 
       colorScheme="teal"
+      variant="outline"
       onClick={onClick}
       leftIcon={leftIcon}
       rightIcon={rightIcon}
-      type={type}
     >
       {label}
     </Button>

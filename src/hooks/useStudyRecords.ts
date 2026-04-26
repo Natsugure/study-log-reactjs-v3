@@ -19,7 +19,6 @@ export function useStudyRecords() {
 
     setError("")
     setRecords(records)
-    console.log(records)
     setIsLoading(false)
   }
 
