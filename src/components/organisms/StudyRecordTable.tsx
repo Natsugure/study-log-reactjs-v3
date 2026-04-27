@@ -31,7 +31,7 @@ export function StudyRecordTable(props: Props) {
         </Thead>
         <Tbody>
           {records.map((item, id) => (
-            <Tr key={id}>
+            <Tr key={id} data-testid="table-row">
               <Td>{item.title}</Td>
               <Td>{item.time}時間</Td>
               <Td>
