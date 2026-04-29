@@ -9,66 +9,55 @@ import {
 
 export function useStudyRecords() {
   const [records, setRecords] = useState<StudyRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  async function fetchAll() {
-    setIsLoading(true);
+  // 本当はサービスも含めてエラーハンドリングすべき。学習用なので、時間があるときに帰ってきて修正。
+  async function fetchAll(): Promise<StudyRecord[] | undefined> {
     const records = await fetchAllRecords();
-
-    if (records === undefined) {
-      setError("データの取得に失敗しました");
-      setIsLoading(false);
-      return;
-    }
-
-    setError("");
-    setRecords(records);
-    setIsLoading(false);
+    return records;
   }
 
   async function add(title: string, time: number) {
     if (!title || !time) {
-      setError("入力されていないの項目があります");
       return;
     }
-    setError("");
 
     setIsLoading(true);
     await insertNewRecord({ title: title, time: time });
-    await fetchAll();
+    setRecords(await fetchAll() || []);
     setIsLoading(false);
   }
 
   async function update(id: string, title: string, time: number) {
     if (!title || !time) {
-      setError("入力されていないの項目があります");
       return;
     }
-    setError("");
 
     setIsLoading(true);
     await updateRecord({ id: id, title: title, time: time });
-    await fetchAll();
+    setRecords(await fetchAll() || []);
     setIsLoading(false);
   }
 
   async function remove(id: string) {
     setIsLoading(true);
     await deleteRecord(id);
-    await fetchAll();
+    setRecords(await fetchAll() || []);
     setIsLoading(false);
   }
 
   useEffect(() => {
-    void fetchAll();
+    const fetchData = async () => {
+      const data = await fetchAll()
+      setRecords(data || []);
+      setIsLoading(false);
+    }
+    void fetchData();
   }, []);
 
   return {
     records,
     isLoading,
-    error,
     addRecord: add,
     updateRecord: update,
     deleteRecord: remove,
