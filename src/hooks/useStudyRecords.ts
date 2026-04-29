@@ -62,7 +62,7 @@ export function useStudyRecords() {
   }
 
   useEffect(() => {
-    void fetchAllRecords();
+    void fetchAll();
   }, []);
 
   return {

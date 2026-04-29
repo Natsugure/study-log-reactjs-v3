@@ -3,8 +3,8 @@ import { beforeEach, describe, it, expect, vi } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 import userEvent from "@testing-library/user-event";
-import * as studyRecordService from "../services/studyRecords"
-import { StudyRecord } from "../types/studyRecords"
+import * as studyRecordService from "../services/studyRecords";
+import { StudyRecord } from "../types/studyRecords";
 
 vi.mock("../services/studyRecords"); 
 
@@ -95,3 +95,49 @@ describe("学習記録の削除", () => {
     expect(screen.queryByText("記録2")).not.toBeInTheDocument()
   });
 })
+
+describe("学習記録の編集", () => {
+  beforeEach(() => {
+    vi.mocked(studyRecordService.updateRecord).mockResolvedValue(undefined);
+
+    vi.mocked(studyRecordService.fetchAllRecords)
+      .mockResolvedValueOnce([
+        new StudyRecord("1", "記録1", 5, "2026-04-01"),
+        new StudyRecord("2", "記録2", 3, "2026-04-27"),
+      ])
+      .mockResolvedValueOnce([
+        new StudyRecord("1", "記録1", 5, "2026-04-01"),
+        new StudyRecord("2", "記録2 更新", 5, "2026-04-27"),
+      ]);
+  });
+
+  it("学習記録を編集するとテーブルの内容が更新されること", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await waitFor(() => expect(screen.queryByTestId("loading-text")).not.toBeInTheDocument());
+
+    const rows = screen.getAllByTestId("table-row");
+    expect(rows).toHaveLength(2);
+
+    // 「記録2」の行の編集ボタンをクリック
+    const editTargetRow = rows.find(row => within(row).queryByText("記録2"));
+    await user.click(within(editTargetRow!).getByRole("button", { name: "編集" }));
+
+    // モーダルに既存の値が初期表示されていることを確認
+    await waitFor(() => expect(screen.getByTestId("study-detail-input")).toHaveValue("記録2"));
+    expect(screen.getByTestId("study-hour-input")).toHaveValue(3);
+
+    // 内容と時間を変更して登録
+    await user.clear(screen.getByTestId("study-detail-input"));
+    await user.type(screen.getByTestId("study-detail-input"), "記録2 更新");
+    const hourInput = screen.getByTestId("study-hour-input");
+    await user.clear(hourInput);
+    await user.type(hourInput, "5");
+    await user.click(screen.getByRole("button", { name: "登録" }));
+
+    // 更新後にテーブルへ変更が反映されることを確認
+    await waitFor(() => expect(screen.getByText("記録2 更新")).toBeInTheDocument());
+    expect(screen.queryByText("記録2")).not.toBeInTheDocument();
+  });
+});
