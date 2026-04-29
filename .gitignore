@@ -24,4 +24,14 @@ dist-ssr
 *.sw?
 
 # AI agents settings
-**/.settings.local.json
+**/settings.local.json
+
+# Environment variables
+.env
+.env.local
+
+# Firebase caches
+.firebase/
+
+# Supabase caches
+supabase/
