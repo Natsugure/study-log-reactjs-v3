@@ -10,7 +10,7 @@ vi.mock("../services/studyRecords");
 
 describe("App.tsx Test", () => {
   beforeEach(() => {
-    vi.mocked(studyRecordService.getAllRecords).mockResolvedValue([]);
+    vi.mocked(studyRecordService.fetchAllRecords).mockResolvedValue([]);
   })
 
   it("タイトルが学習記録アプリであること", async () => {
@@ -33,7 +33,7 @@ describe("学習記録の登録", () => {
     vi.mocked(studyRecordService.insertNewRecord).mockResolvedValue(undefined);
     vi.mocked(studyRecordService.deleteRecord).mockResolvedValue(undefined);
 
-    vi.mocked(studyRecordService.getAllRecords).mockResolvedValueOnce([
+    vi.mocked(studyRecordService.fetchAllRecords).mockResolvedValueOnce([
       new StudyRecord("1", "記録1", 5, "2026-04-01"),
     ])
     .mockResolvedValueOnce([
@@ -70,7 +70,7 @@ describe("学習記録の削除", () => {
     vi.mocked(studyRecordService.insertNewRecord).mockResolvedValue(undefined);
     vi.mocked(studyRecordService.deleteRecord).mockResolvedValue(undefined);
 
-    vi.mocked(studyRecordService.getAllRecords).mockResolvedValueOnce([
+    vi.mocked(studyRecordService.fetchAllRecords).mockResolvedValueOnce([
       new StudyRecord("1", "記録1", 5, "2026-04-01"),
       new StudyRecord("2", "記録2", 3, "2026-04-27"),
     ])

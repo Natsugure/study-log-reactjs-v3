@@ -3,60 +3,79 @@ import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom/vitest";
 import { SubmitFormModal } from "./SubmitFormModal";
 import userEvent from "@testing-library/user-event";
+import type React from "react";
+
+const renderModal = (props?: Partial<React.ComponentProps<typeof SubmitFormModal>>) => {
+  render(
+    <SubmitFormModal
+      formMode="add"
+      id=""
+      selectedRecord={{ title: "", time: 0 }}
+      isOpen={true}
+      onClose={vi.fn()}
+      addRecord={vi.fn()}
+      updateRecord={vi.fn()}
+      {...props}
+    />,
+  );
+};
 
 describe("SubmitFormModal Test", () => {
   it("モーダルのタイトルが「学習記録 新規登録」であること", () => {
-    render(<SubmitFormModal isOpen={true} onClose={vi.fn()} addRecord={vi.fn()} />);
+    renderModal();
 
     expect(screen.getByText("学習記録 新規登録")).toBeInTheDocument();
   });
 
   it("学習内容が未入力である場合にエラーが表示されること", async () => {
     const user = userEvent.setup();
-    render(<SubmitFormModal isOpen={true} onClose={vi.fn()} addRecord={vi.fn()} />);
+    renderModal();
 
     // Inputに何も入力しない状態で登録ボタンを押す
     await user.click(screen.getByRole("button", { name: "登録" }));
 
     expect(screen.getByText("内容は入力必須です")).toBeInTheDocument();
-  })
+  });
 
   it("学習時間が未入力である場合にエラーが表示されること", async () => {
     const user = userEvent.setup();
-    render(<SubmitFormModal isOpen={true} onClose={vi.fn()} addRecord={vi.fn()} />);
+    renderModal();
 
     await user.type(screen.getByTestId("study-detail-input"), "記録1");
     const hourInput = screen.getByTestId("study-hour-input");
-    await user.clear(hourInput);  // デフォルト値の0をクリア
+    await user.clear(hourInput); // デフォルト値の0をクリア
     await user.click(screen.getByRole("button", { name: "登録" }));
 
     expect(await screen.findByText("時間は入力必須です")).toBeInTheDocument();
-  })
-
+  });
 
   it("学習時間が0時間未満である場合にエラーが表示されること", async () => {
     const user = userEvent.setup();
-    render(<SubmitFormModal isOpen={true} onClose={vi.fn()} addRecord={vi.fn()} />);
+    renderModal();
 
     await user.type(screen.getByTestId("study-detail-input"), "記録1");
     const hourInput = screen.getByTestId("study-hour-input");
-    await user.clear(hourInput);  // デフォルト値の0をクリア
-    await user.type(hourInput, "0");  // ユーザー自身が0時間で入力
+    await user.clear(hourInput); // デフォルト値の0をクリア
+    await user.type(hourInput, "0"); // ユーザー自身が0時間で入力
     await user.click(screen.getByRole("button", { name: "登録" }));
 
-    expect(await screen.findByText("時間は1~24の間で入力してください")).toBeInTheDocument();
-  })
+    expect(
+      await screen.findByText("時間は1~24の間で入力してください"),
+    ).toBeInTheDocument();
+  });
 
   it("学習時間が24時間を超える場合にエラーが表示されること", async () => {
     const user = userEvent.setup();
-    render(<SubmitFormModal isOpen={true} onClose={vi.fn()} addRecord={vi.fn()} />);
+    renderModal();
 
     await user.type(screen.getByTestId("study-detail-input"), "記録1");
     const hourInput = screen.getByTestId("study-hour-input");
-    await user.clear(hourInput);  // デフォルト値の0をクリア
+    await user.clear(hourInput); // デフォルト値の0をクリア
     await user.type(hourInput, "25");
     await user.click(screen.getByRole("button", { name: "登録" }));
 
-    expect(await screen.findByText("時間は1~24の間で入力してください")).toBeInTheDocument();
-  })
+    expect(
+      await screen.findByText("時間は1~24の間で入力してください"),
+    ).toBeInTheDocument();
+  });
 });
